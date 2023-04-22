@@ -18,7 +18,8 @@ public class OrderRouter {
     @Bean
     public RouterFunction<ServerResponse> routes() {
         return RouterFunctions
-                .route(GET("/orders/{id}"), handler::findById)
-                .andRoute(POST("/orders"), handler::save);
+                .route(POST("/orders"), handler::save)
+                .andRoute(GET("/orders"), handler::getAll)
+                .andRoute(GET("/orders/{id}"), handler::findById);
     }
 }

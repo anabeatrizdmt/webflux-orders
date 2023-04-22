@@ -1,5 +1,12 @@
 package com.example.ordersapi.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 import java.util.List;
 
-public record OrderRequest(List<ProductDTO> products) {}
+@Data
+public class OrderRequest {
+
+    @JsonProperty("productList")
+    private List<ProductDTO> productList;
+}

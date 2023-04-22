@@ -1,7 +1,18 @@
 package com.example.ordersapi.dto;
 
 import com.example.ordersapi.model.Order;
+import lombok.Builder;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
-public record OrderResponse (String id, List<ProductDTO> products, Order.Status status) {}
+@Builder
+public record OrderResponse (
+        String id,
+        List<Order.Product> productList,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
+        Order.Status status,
+        BigDecimal totalAmount
+) {}
