@@ -14,5 +14,6 @@ public record OrderResponse (
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         Order.Status status,
-        BigDecimal totalAmount
+        BigDecimal totalAmount,
+        String userId
 ) {}

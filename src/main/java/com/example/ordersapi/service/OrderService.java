@@ -29,6 +29,7 @@ public class OrderService {
                 .updatedAt(LocalDateTime.now())
                 .status(Order.Status.PLACED)
                 .totalAmount(BigDecimal.ZERO)
+                .userId(request.getUserId())
                 .build();
 
         return repository.save(order);

@@ -2,6 +2,7 @@ package com.example.ordersapi.controller.handler;
 
 import com.example.ordersapi.dto.OrderRequest;
 import com.example.ordersapi.dto.OrderResponse;
+import com.example.ordersapi.pubsub.PullOrderComponent;
 import com.example.ordersapi.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -17,11 +18,14 @@ import reactor.core.publisher.Mono;
 public class OrderHandler {
 
     private final OrderService orderService;
+    private final PullOrderComponent pullOrderComponent;
+
 
     public Mono<ServerResponse> save(ServerRequest request) {
 
         return request.bodyToMono(OrderRequest.class)
                 .flatMap(orderService::save)
+                .flatMap(order -> pullOrderComponent.pullNewOrder(order))
                 .flatMap(response -> ServerResponse
                         .ok()
                         .contentType(MediaType.APPLICATION_JSON)
@@ -32,13 +36,14 @@ public class OrderHandler {
     public Mono<ServerResponse> getAll(ServerRequest request) {
         Flux<OrderResponse> orderResponses = orderService
                 .getAll()
-                .map(product -> OrderResponse.builder()
-                        .id(product.getId())
-                        .productList(product.getProductsList())
-                        .createdAt(product.getCreatedAt())
-                        .updatedAt(product.getUpdatedAt())
-                        .status(product.getStatus())
-                        .totalAmount(product.getTotalAmount())
+                .map(order -> OrderResponse.builder()
+                        .id(order.getId())
+                        .productList(order.getProductsList())
+                        .createdAt(order.getCreatedAt())
+                        .updatedAt(order.getUpdatedAt())
+                        .status(order.getStatus())
+                        .totalAmount(order.getTotalAmount())
+                        .userId(order.getUserId())
                         .build());
 
         return ServerResponse
@@ -51,13 +56,14 @@ public class OrderHandler {
 
         String id = request.pathVariable("id");
         Mono<OrderResponse> responseMono = orderService.findById(id)
-                .map(product -> new OrderResponse(
-                        product.getId(),
-                        product.getProductsList(),
-                        product.getCreatedAt(),
-                        product.getUpdatedAt(),
-                        product.getStatus(),
-                        product.getTotalAmount()
+                .map(order -> new OrderResponse(
+                        order.getId(),
+                        order.getProductsList(),
+                        order.getCreatedAt(),
+                        order.getUpdatedAt(),
+                        order.getStatus(),
+                        order.getTotalAmount(),
+                        order.getUserId()
                 ));
 
         return ServerResponse

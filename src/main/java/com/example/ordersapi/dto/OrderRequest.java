@@ -9,4 +9,7 @@ public class OrderRequest {
 
     @JsonProperty("productList")
     private List<ProductDTO> productList;
+
+    @JsonProperty("userId")
+    private String userId;
 }

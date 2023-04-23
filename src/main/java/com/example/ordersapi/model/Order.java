@@ -22,7 +22,8 @@ public class Order {
     private LocalDateTime updatedAt;
     private Status status;
     private BigDecimal totalAmount;
-    //    public String userId;
+    public String userId;
+
 
     public static record Product (
 //        String id,
