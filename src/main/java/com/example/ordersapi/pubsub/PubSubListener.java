@@ -36,19 +36,24 @@ public class PubSubListener implements InitializingBean {
                                         log.info("Checking user status - {}", order);
                                         String userId = order.getUserId();
                                         return client.getUserStatus(userId)
-                                                .filter(userStatus -> userStatus == UserStatus.ACTIVE)
-                                                .switchIfEmpty(Mono.error(new IllegalStateException("User status is BLOCKED")))
-                                                .map(userStatus -> order);
-                                    })
-                                    .flatMap(order -> {
-                                        log.info("Changing order status - {}", order);
-                                        var confirmedStatus = Order.Status.CONFIRMED;
-                                        return orderRepository.save(next.order()
-                                                .withStatus(confirmedStatus)
-                                                .withUpdatedAt(LocalDateTime.now()));
+                                                .flatMap(userStatus -> {
+                                                    if (userStatus != UserStatus.ACTIVE) {
+                                                        order.setStatus(Order.Status.ERROR_IN_ORDER);
+                                                        order.setUpdatedAt(LocalDateTime.now());
+                                                        return orderRepository.save(order);
+                                                    } else {
+                                                        log.info("Changing order status - {}", order);
+                                                        var confirmedStatus = Order.Status.CONFIRMED;
+                                                        return orderRepository.save(order.withStatus(confirmedStatus).withUpdatedAt(LocalDateTime.now()));
+                                                    }
+                                                })
+                                                .onErrorResume(err -> {
+                                                    log.error("Error: {}", err.getMessage());
+                                                    return Mono.empty();
+                                                });
                                     })
                                     .subscribe(
-                                            order -> log.info("Order confirmed - {}", order),
+                                            order -> log.info("Order updated - {}", order),
                                             err -> log.error("Error: {}", err.getMessage()),
                                             () -> log.info("Completed")
                                     );
