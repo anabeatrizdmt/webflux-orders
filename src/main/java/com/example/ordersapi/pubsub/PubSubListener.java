@@ -1,5 +1,6 @@
 package com.example.ordersapi.pubsub;
 
+import com.example.ordersapi.client.CatalogClient;
 import com.example.ordersapi.client.UserClient;
 import com.example.ordersapi.model.Order;
 import com.example.ordersapi.model.UserStatus;
@@ -12,7 +13,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 public class PubSubListener implements InitializingBean {
     private final Sinks.Many<PubSubMessage> sink;
     private final OrderRepository orderRepository;
-    private final UserClient client;
+    private final UserClient userClient;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -35,7 +35,7 @@ public class PubSubListener implements InitializingBean {
                                     .flatMap(order -> {
                                         log.info("Checking user status - {}", order);
                                         String userId = order.getUserId();
-                                        return client.getUserStatus(userId)
+                                        return userClient.getUserStatus(userId)
                                                 .flatMap(userStatus -> {
                                                     if (userStatus != UserStatus.ACTIVE) {
                                                         order.setStatus(Order.Status.ERROR_IN_ORDER);

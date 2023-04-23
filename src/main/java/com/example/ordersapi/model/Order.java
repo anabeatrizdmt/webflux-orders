@@ -17,7 +17,7 @@ public class Order {
 
     @Id
     private String id;
-    private List<Product> productsList;
+    private List<OrderProduct> productsList;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Status status;
@@ -25,12 +25,16 @@ public class Order {
     public String userId;
 
 
-    public static record Product (
+    public static record OrderProduct(
 //        String id,
             String productId,
             Long quantity
 //            BigDecimal amount
-    ) {}
+    ) {
+        public String getProductId() {
+            return productId;
+        }
+    }
     public enum Status {
         PLACED, CONFIRMED, ERROR_IN_ORDER, SENT_FOR_DELIVERY
     }

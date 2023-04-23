@@ -10,7 +10,7 @@ import java.util.List;
 @Builder
 public record OrderResponse (
         String id,
-        List<Order.Product> productList,
+        List<Order.OrderProduct> productList,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         Order.Status status,
