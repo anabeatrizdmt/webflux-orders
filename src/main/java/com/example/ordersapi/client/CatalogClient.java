@@ -18,7 +18,7 @@ public class CatalogClient {
     private final ObjectMapper mapper;
 
     public CatalogClient(WebClient.Builder clientBuilder, ObjectMapper mapper) {
-        this.client = clientBuilder.baseUrl("http://localhost:8081").build();
+        this.client = clientBuilder.baseUrl("http://localhost:8080").build();
         this.mapper = mapper;
     }
 

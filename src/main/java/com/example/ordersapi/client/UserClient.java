@@ -15,7 +15,7 @@ public class UserClient {
     private final ObjectMapper mapper;
 
     public UserClient(WebClient.Builder clientBuilder, ObjectMapper mapper) {
-        this.client = clientBuilder.baseUrl("http://localhost:8083").build();
+        this.client = clientBuilder.baseUrl("http://localhost:8080").build();
         this.mapper = mapper;
     }
 
