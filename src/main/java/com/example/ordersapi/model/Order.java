@@ -34,6 +34,10 @@ public class Order {
         public String getProductId() {
             return productId;
         }
+
+        public Long getQuantity() {
+            return quantity;
+        }
     }
     public enum Status {
         PLACED, CONFIRMED, ERROR_IN_ORDER, SENT_FOR_DELIVERY
