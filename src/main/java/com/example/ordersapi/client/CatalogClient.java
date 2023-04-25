@@ -22,7 +22,7 @@ public class CatalogClient {
         this.mapper = mapper;
     }
 
-    public Flux<Product> getProductStock(List<String> ids) {
+    public Flux<Product> getProductInfo(List<String> ids) {
         return client.post()
                 .uri(STOCK_URI)
                 .contentType(MediaType.APPLICATION_JSON)
