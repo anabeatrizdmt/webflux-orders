@@ -37,46 +37,8 @@ public class PubSubListener implements InitializingBean {
                             log.info("Starting listener onNext - {}", next);
                             final var id = next.id();
                             orderRepository.findById(id)
-                                    .flatMap(order -> {
-                                        log.info("Checking user status - {}", order);
-                                        String userId = order.getUserId();
-                                        return userClient.getUserStatus(userId)
-                                                .flatMap(userStatus -> {
-                                                    if (userStatus != UserStatus.ACTIVE) {
-                                                        log.info("Changing order status - {}", order);
-                                                        order.setStatus(Order.Status.ERROR_IN_ORDER);
-                                                        order.setUpdatedAt(LocalDateTime.now());
-                                                        return orderRepository.save(order);
-                                                    } else {
-                                                        log.info("Changing order status - {}", order);
-                                                        order.setStatus(Order.Status.CONFIRMED);
-                                                        order.setUpdatedAt(LocalDateTime.now());
-                                                        return orderRepository.save(order);                                                    }
-                                                }).flatMap(updatedOrder -> {
-                                                    log.info("2-Changing order status - {}", order);
-                                                    log.info("3-Changing order status - {}", updatedOrder);
-                                                    if (updatedOrder.getStatus().equals(Order.Status.CONFIRMED)) {
-                                                        log.info("Test - Changing order status - {}", order);
-                                                        List<ProductUpdateRequest> productUpdates = updatedOrder.getProductsList().stream()
-                                                                .map(product -> new ProductUpdateRequest(product.getProductId(), product.getQuantity()))
-                                                                .collect(Collectors.toList());
-                                                        order.setStatus(Order.Status.SENT_FOR_DELIVERY);
-                                                        order.setUpdatedAt(LocalDateTime.now());
-
-                                                        return orderRepository.save(order)
-                                                                .flatMap(savedOrder -> {
-                                                                    log.info("4-Changing order status - {}", savedOrder);
-                                                                    return catalogStockClient.updateStock(productUpdates);
-                                                                });
-                                                    } else {
-                                                        return Mono.just(updatedOrder);
-                                                    }
-                                                })
-                                                .onErrorResume(err -> {
-                                                    log.error("Error: {}", err.getMessage());
-                                                    return Mono.empty();
-                                                });
-                                    })
+                                    .flatMap(this::updateOrderStatus)
+                                    .flatMap(this::updateCatalogStock)
                                     .subscribe(
                                             order -> log.info("Order updated - {}", order),
                                             err -> log.error("Error: {}", err.getMessage()),
@@ -86,4 +48,39 @@ public class PubSubListener implements InitializingBean {
                 );
     }
 
+    private Mono<Order> updateOrderStatus(Order order) {
+        log.info("Checking user status - {}", order);
+        String userId = order.getUserId();
+        return userClient.getUserStatus(userId)
+                .flatMap(userStatus -> {
+                    if (userStatus != UserStatus.ACTIVE) {
+                        log.info("Changing order status - {}", order);
+                        order.setStatus(Order.Status.ERROR_IN_ORDER);
+                    } else {
+                        log.info("Changing order status - {}", order);
+                        order.setStatus(Order.Status.CONFIRMED);
+                    }
+                    order.setUpdatedAt(LocalDateTime.now());
+                    return orderRepository.save(order);
+                });
+    }
+
+    private Mono<Order> updateCatalogStock(Order order) {
+        log.info("Updating catalog stock - {}", order);
+        if (order.getStatus().equals(Order.Status.CONFIRMED)) {
+            List<ProductUpdateRequest> productUpdates = order.getProductsList().stream()
+                    .map(product -> new ProductUpdateRequest(product.getProductId(), product.getQuantity()))
+                    .collect(Collectors.toList());
+            order.setStatus(Order.Status.SENT_FOR_DELIVERY);
+            order.setUpdatedAt(LocalDateTime.now());
+            return orderRepository.save(order)
+                    .flatMap(savedOrder -> {
+                        log.info("Updating catalog stock - {}", savedOrder);
+                        return catalogStockClient.updateStock(productUpdates)
+                                .thenReturn(savedOrder);
+                    });
+        } else {
+            return Mono.just(order);
+        }
+    }
 }
