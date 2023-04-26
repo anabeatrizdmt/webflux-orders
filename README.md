@@ -20,7 +20,7 @@ git clone https://github.com/anabeatrizdmt/webflux-orders.git
 2. Install dependencies:
 
 ```
-cd webflux-catalog
+cd webflux-orders
 mvn install
 ```
 
