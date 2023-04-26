@@ -4,6 +4,21 @@ This project is a reactive RESTful API for managing orders. It is written in Jav
 
 **Note:** This API is part of a larger e-commerce system that includes product catalog management and user management. To run the complete system, you must also run the [WebFlux Catalog API](https://github.com/anabeatrizdmt/webflux-catalog), the [WebFlux Users API](https://github.com/anabeatrizdmt/webflux-users), and the [WebFlux E-commerce API Gateway](https://github.com/anabeatrizdmt/webflux-ecommerce-api-gateway). The API Gateway provides a unified interface to the entire system and manages communication between the individual APIs.
 
+
+## Table of Contents
+
+- [Requirements](#requirements)
+- [Installation and Setup](#installation-and-setup)
+- [Usage](#usage)
+  - [Create an order](#create-an-order)
+  - [Get all orders](#get-all-orders)
+  - [Get an order by ID](#get-an-order-by-id)
+- [Order Status](#order-status)
+- [Dependencies](#dependencies)
+  - [User Status](#user-status)
+  - [Product Stock](#product-stock)
+  - [Update Product Stock](#update-product-stock)
+  
 ## Requirements
 
 - Java 11 or higher
